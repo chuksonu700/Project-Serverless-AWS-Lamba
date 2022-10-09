@@ -24,7 +24,7 @@ export class TodosAccess {
     getTodosForUser = async (userId: string,lastKey:string) => {
 
         logger.info(`Getting Todos for User: ${userId}`)
-            if (lastKey != 'null') {
+            if (lastKey !== 'null') {
                 const result = await  docClient.query({
                     TableName:  TodosTable,
                     KeyConditionExpression: "userId = :u",
@@ -53,7 +53,7 @@ export class TodosAccess {
                     Limit: 10,
                     ExclusiveStartKey:null
             }).promise()
-            
+
                 console.log('result: ',result)
             
             logger.info(`Todo Items for user:${userId} retrieved`)

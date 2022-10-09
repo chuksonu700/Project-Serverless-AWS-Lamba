@@ -7,7 +7,7 @@ import { UpdateTodoRequest } from '../types/UpdateTodoRequest';
 export async function getTodos(idToken: string,lastKey:string) {
   console.log('Fetching todos')
   console.log(idToken);
-  if (lastKey != 'null') {
+  if (lastKey !== 'null') {
     const response = await Axios.get(`${apiEndpoint}/todos?nextKey=${lastKey}`, {
     
       headers: {
