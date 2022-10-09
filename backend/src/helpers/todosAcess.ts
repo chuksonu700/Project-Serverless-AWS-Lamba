@@ -21,25 +21,45 @@ const TodosTable = process.env.TODOS_TABLE
 export class TodosAccess {
     constructor() {}
 
-    getTodosForUser = async (userId: string) => {
+    getTodosForUser = async (userId: string,lastKey:string) => {
+
         logger.info(`Getting Todos for User: ${userId}`)
-        let result, ExclusiveStartKey;
-
-            result = await  docClient.query({
-                TableName:  TodosTable,
-                KeyConditionExpression: "userId = :u",
-                ExpressionAttributeValues: {
-                    ":u": userId
-                },
-                Limit:15,
-                ExclusiveStartKey
+            if (lastKey != 'null') {
+                const result = await  docClient.query({
+                    TableName:  TodosTable,
+                    KeyConditionExpression: "userId = :u",
+                    ExpressionAttributeValues: {
+                        ":u": userId
+                    },
+                    Limit: 10,
+                    ExclusiveStartKey: {
+                            todoId: lastKey,
+                            userId: userId
+                        }
+                }).promise()
+    
+                console.log('result.data: ',result.data)
+                console.log('result: ',result)
+            
+            logger.info(`Todo Items for user:${userId} retrieved`)
+            return result
+            } else {
+                const result = await  docClient.query({
+                    TableName:  TodosTable,
+                    KeyConditionExpression: "userId = :u",
+                    ExpressionAttributeValues: {
+                        ":u": userId
+                    },
+                    Limit: 10,
+                    ExclusiveStartKey:null
             }).promise()
-
-            console.log('result.data: ',result.data)
-            console.log('result: ',result)
-        
-        logger.info(`Todo Items for user:${userId} retrieved`)
-        return result
+            
+                console.log('result: ',result)
+            
+            logger.info(`Todo Items for user:${userId} retrieved`)
+            return result
+            }        
+      
     }
 
     createTodos = async (todo: TodoItem): Promise < TodoItem > => {

@@ -11,7 +11,8 @@ import {
   Icon,
   Input,
   Image,
-  Loader
+  Loader,
+  GridColumn
 } from 'semantic-ui-react'
 
 import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
@@ -27,13 +28,15 @@ interface TodosState {
   todos: Todo[]
   newTodoName: string
   loadingTodos: boolean
+  lastKey: string
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
   state: TodosState = {
     todos: [],
     newTodoName: '',
-    loadingTodos: true
+    loadingTodos: true,
+    lastKey:'null'
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,13 +91,27 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       alert('Todo deletion failed')
     }
   }
+  getMore = async ()=>{
+    try {
+      const freshTodo = await getTodos(this.props.auth.getIdToken(),this.state.lastKey)
+      this.setState({
+        todos:[...this.state.todos,freshTodo.items],
+        lastKey:freshTodo.lastTodoItems
+      })
+    } catch (e) {
+      alert(`Failed to get more todos: ${(e as Error).message}`) 
+    }
+    
 
+
+  }
   async componentDidMount() {
     try {
-      const todos = await getTodos(this.props.auth.getIdToken())
+      const callGetTodos = await getTodos(this.props.auth.getIdToken(),this.state.lastKey)
       this.setState({
-        todos,
-        loadingTodos: false
+        todos:callGetTodos.items,
+        loadingTodos: false,
+        lastKey:callGetTodos.LastEvaluatedKey.todoId
       })
     } catch (e) {
       alert(`Failed to fetch todos: ${(e as Error).message}`)
@@ -158,6 +175,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   renderTodosList() {
     return (
+      <>
       <Grid padded>
         {this.state.todos.map((todo, pos) => {
           return (
@@ -202,6 +220,14 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
           )
         })}
       </Grid>
+      <Grid>
+        <Grid.Column width={8} verticalAlign="middle">
+          <Button color='blue' onClick={()=>this.getMore()}>
+            View More
+          </Button>
+        </Grid.Column>
+      </Grid>
+      </>
     )
   }
 

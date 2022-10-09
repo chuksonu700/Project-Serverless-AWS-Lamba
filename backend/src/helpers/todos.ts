@@ -34,8 +34,8 @@ export const deleteTodo = async (todoId: string, userId: string) => {
     return await todosAccess.deleteTodo(todoId, userId)
 }
 
-export const getTodosForUser = async (userId: string) => {
-    return await todosAccess.getTodosForUser(userId)
+export const getTodosForUser = async (userId: string,lastKey:string) => {
+    return await todosAccess.getTodosForUser(userId,lastKey)
 }
 
 export const updateTodo = async (userId: string, todoId: string, updatedTodo: UpdateTodoRequest) => {

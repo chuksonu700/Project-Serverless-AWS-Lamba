@@ -11,16 +11,19 @@ import { getUserId } from '../utils';
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     // Write your code here
-    const userId=await getUserId(event)
+    const userId=await getUserId(event);
+    const lastTodoKey= await getLaskKey(event);
 
+    
     console.log("user:gooten",userId)
 
-    const todos = await getTodosForUser(userId)
-
+    const todos = await getTodosForUser(userId,lastTodoKey);
+    console.log("lastTodoKey:");
     return {
       statusCode:200,
       body:JSON.stringify({
-        items:todos.Items
+        items:todos.Items,
+        LastEvaluatedKey:todos.LastEvaluatedKey
       })
     }
   });
@@ -30,3 +33,13 @@ handler.use(
     credentials: true
   })
 )
+async function getLaskKey(event: APIGatewayProxyEvent) {
+  try {
+    let nextKey = await event.queryStringParameters['nextKey']
+    return nextKey  
+  } catch (e) {
+    return 'null'
+  }
+
+}
+
