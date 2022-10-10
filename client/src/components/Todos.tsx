@@ -150,7 +150,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   renderCreateTodoInput() {
     return (
-      <Grid.Row key={Math.random()*50505}>
+      <Grid.Row >
         <Grid.Column width={16}>
           <Input
             action={{
@@ -164,6 +164,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
             actionPosition="left"
             placeholder="To change the world..."
             onChange={this.handleNameChange}
+            value={this.state.newTodoName}
           />
         </Grid.Column>
         <Grid.Column width={16}>
@@ -184,7 +185,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   renderLoading() {
     return (
       <Grid.Row>
-        <Loader indeterminate active inline="centered" key={Math.random()*888888}>
+        <Loader indeterminate active inline="centered" >
           Loading TODOs
         </Loader>
       </Grid.Row>
@@ -240,7 +241,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       </Grid>
       { this.state.lastKey !== "null" ?
         <Grid>
-        <Grid.Row key={(Math.random()*999999)}>
+        <Grid.Row >
         <Grid.Column width={10} verticalAlign="middle">
           <Button color='blue' onClick={()=>this.getMore()}>
             View More ...
