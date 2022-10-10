@@ -11,8 +11,7 @@ import {
   Icon,
   Input,
   Image,
-  Loader,
-  GridColumn
+  Loader
 } from 'semantic-ui-react'
 
 import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
@@ -40,7 +39,9 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(`this.state.newTodoName is ${this.state.newTodoName} and length is ${this.state.newTodoName.length}`)
     this.setState({ newTodoName: event.target.value })
+    console.log(`this.state.newTodoName is ${this.state.newTodoName} and length is ${this.state.newTodoName.length}`)
   }
 
   onEditButtonClick = (todoId: string) => {
@@ -48,19 +49,25 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
-    try {
-      const dueDate = this.calculateDueDate()
-      const newTodo = await createTodo(this.props.auth.getIdToken(), {
-        name: this.state.newTodoName,
-        dueDate
-      })
-      this.setState({
-        todos: [...this.state.todos, newTodo],
-        newTodoName: ''
-      })
-    } catch {
-      alert('Todo creation failed')
+  
+    if (this.state.newTodoName.length <= 2) {
+      alert("Error invalid Name: Must be At least Three (3) Characters long ")
+    } else {
+      try {
+        const dueDate = this.calculateDueDate()
+        const newTodo = await createTodo(this.props.auth.getIdToken(), {
+          name: this.state.newTodoName,
+          dueDate
+        })
+        this.setState({
+          todos: [...this.state.todos, newTodo],
+          newTodoName: ''
+        })
+      } catch {
+        alert('Todo creation failed')
+      }  
     }
+    
   }
 
   onTodoDelete = async (todoId: string) => {
@@ -92,12 +99,15 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     }
   }
   getMore = async ()=>{
+    this.setState({
+      lastKey:'null'
+    })
     try {
       const freshTodo = await getTodos(this.props.auth.getIdToken(),this.state.lastKey)
       this.setState({
         todos:[...this.state.todos,freshTodo.items],
-        lastKey:freshTodo.lastTodoItems
       })
+      this.checkLastKey(freshTodo)
     } catch (e) {
       alert(`Failed to get more todos: ${(e as Error).message}`) 
     }
@@ -110,11 +120,19 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       const callGetTodos = await getTodos(this.props.auth.getIdToken(),this.state.lastKey)
       this.setState({
         todos:callGetTodos.items,
-        loadingTodos: false,
-        lastKey:callGetTodos.LastEvaluatedKey.todoId
+        loadingTodos: false
       })
+      this.checkLastKey(callGetTodos)
     } catch (e) {
       alert(`Failed to fetch todos: ${(e as Error).message}`)
+    }
+  }
+  async checkLastKey(callGetTodos:any){
+    //checking for last Key
+    if (callGetTodos.LastEvaluatedKey){
+      this.setState({
+        lastKey:callGetTodos.LastEvaluatedKey.todoId
+      })
     }
   }
 
@@ -132,7 +150,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   renderCreateTodoInput() {
     return (
-      <Grid.Row>
+      <Grid.Row key={Math.random()*50505}>
         <Grid.Column width={16}>
           <Input
             action={{
@@ -166,7 +184,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   renderLoading() {
     return (
       <Grid.Row>
-        <Loader indeterminate active inline="centered">
+        <Loader indeterminate active inline="centered" key={Math.random()*888888}>
           Loading TODOs
         </Loader>
       </Grid.Row>
@@ -220,13 +238,16 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
           )
         })}
       </Grid>
-      <Grid>
-        <Grid.Column width={8} verticalAlign="middle">
+      { this.state.lastKey !== "null" ?
+        <Grid>
+        <Grid.Row key={(Math.random()*999999)}>
+        <Grid.Column width={10} verticalAlign="middle">
           <Button color='blue' onClick={()=>this.getMore()}>
-            View More
+            View More ...
           </Button>
         </Grid.Column>
-      </Grid>
+        </Grid.Row>
+      </Grid>:''}
       </>
     )
   }
