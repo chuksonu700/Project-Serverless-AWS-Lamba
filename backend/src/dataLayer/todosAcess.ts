@@ -9,13 +9,24 @@ import {
 import {
     UpdateTodoRequest
 } from '../requests/UpdateTodoRequest'
+
+//adding keep alive
+const https = require('https');
+const agent = new https.Agent({
+  keepAlive: true
+});
 const awsXRay = require('aws-xray-sdk');
 const XAWS = awsXRay.captureAWS(require('aws-sdk'));
 
 const logger = createLogger('TodosAccess')
 
 // TODO: Implement the dataLayer logic
-const docClient = new XAWS.DynamoDB.DocumentClient()
+// this will enable keep alive for connection
+const docClient = new XAWS.DynamoDB.DocumentClient({
+    httpOptions: {
+        agent
+      }
+})
 // const docClient:DocumentClient = new AWS.DynamoDB.DocumentClient()
 const TodosTable = process.env.TODOS_TABLE
 export class TodosAccess {
